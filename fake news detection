@@ -1,0 +1,71 @@
+import pandas as pd
+
+data = {
+    'text': [
+        # REAL NEWS
+        "The government passed a new bill to improve healthcare services across the country",
+        "Scientists at ISRO successfully launched a new satellite into orbit",
+        "The Supreme Court announced a major decision regarding environmental laws",
+        "India's economy shows steady growth in the latest quarterly report",
+
+        # FAKE NEWS
+        "Breaking: Drinking hot water every 10 minutes cures coronavirus instantly",
+        "Aliens have landed in Delhi and government is hiding the truth",
+        "Earn 5000 rupees daily by working from home without any effort click here",
+        "This one secret trick will make you a millionaire overnight guaranteed"
+    ],
+    'label': [
+        "REAL", "REAL", "REAL", "REAL",
+        "FAKE", "FAKE", "FAKE", "FAKE"
+    ]
+}
+
+df = pd.DataFrame(data)
+print(df)
+df['label'] = df['label'].map({'REAL': 1, 'FAKE': 0})
+from sklearn.model_selection import train_test_split
+
+X = df['text']
+y = df['label']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+vectorizer = TfidfVectorizer(stop_words='english')
+
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression()
+model.fit(X_train_vec, y_train)
+from sklearn.metrics import accuracy_score
+
+y_pred = model.predict(X_test_vec)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+def predict_news(news):
+    news_vec = vectorizer.transform([news])
+    prediction = model.predict(news_vec)
+
+    return "REAL NEWS" if prediction[0] == 1 else "FAKE NEWS"
+# Real news example
+print(predict_news(
+    "Government launches new digital education scheme for students"
+))
+
+# Fake news example
+print(predict_news(
+    "Click this link to win iPhone for free limited offer"
+))
+
+# Another fake
+print(predict_news(
+    "Drinking salt water cures all diseases instantly"
+))
+
+# Another real
+print(predict_news(
+    "ISRO plans new mission to explore Mars in upcoming years"
+))
